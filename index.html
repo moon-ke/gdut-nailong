@@ -106,13 +106,10 @@
   #run .race-slot{position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);}
   #run .race-slot.racing{animation:racetrack 8s linear forwards;}
   @keyframes racetrack{from{transform:translate(calc(-50% - 54vw),-50%);}to{transform:translate(calc(-50% + 54vw),-50%);}}
-  #run .runner img{width:min(52vw,230px);filter:drop-shadow(0 16px 18px rgba(0,0,0,.42));}
-  #run .runner img.bob{animation:bob 2.4s ease-in-out infinite;}
-  #run .runner img.run{width:min(46vw,230px);animation:run .5s ease-in-out infinite;}
-  @keyframes run{
-    0%,100%{transform:translateY(0) rotate(-2deg);}
-    50%{transform:translateY(-4px) rotate(2deg);}
-  }
+  #run #run-mascot{width:min(46vw,230px);aspect-ratio:250/444;background-repeat:no-repeat;background-position:center;background-size:100% 100%;filter:drop-shadow(0 16px 18px rgba(0,0,0,.42));}
+  #run #run-mascot.bob{animation:bob 2.4s ease-in-out infinite;}
+  #run #run-mascot.run{background-size:600% 100%;background-position:0 0;animation:runsprite .72s steps(6,end) infinite;}
+  @keyframes runsprite{0%{background-position:0 0;}100%{background-position:100% 0;}}
   #run .cheer{position:absolute;z-index:6;top:20%;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.97);border-radius:18px;padding:11px 18px;font-size:16px;font-weight:800;color:var(--ink);box-shadow:0 10px 24px rgba(0,0,0,.22);opacity:0;pointer-events:none;transition:opacity .25s;text-align:center;white-space:nowrap;}
   #run .cheer.show{opacity:1;}
   #run .stats{position:relative;z-index:2;background:rgba(255,255,255,.96);border-radius:28px 28px 0 0;padding:22px 22px 30px;}
@@ -219,7 +216,7 @@
       </div>
       <div class="runner">
         <div class="cheer" id="run-cheer">出发啦！</div>
-        <div class="race-slot" id="run-slot"><img id="run-mascot" src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/D2ftb1hHKoAAbGxvl0FcD9jEnKe" alt="奶娃跑"></div>
+        <div class="race-slot" id="run-slot"><div id="run-mascot"></div></div>
       </div>
       <div class="stats">
         <div class="stat-row">
@@ -361,6 +358,7 @@
     M+"ARN1biAYIo40aHx3RiyckfwLncd", // 5 迈右腿
     M+"ELOxbOgODoZHvBxnppHcfuGLnee"  // 6 落地缓冲
   ];
+  var SPRITE = M+"VURXbPXojob09UxAXu3cUegpnkd"; // 跑步6帧SpriteSheet精灵图
   var CHEERS = [
     {at:8,  msg:"出发！奶娃带你跑"},
     {at:30, msg:"热身完成，越跑越顺！"},
@@ -392,10 +390,8 @@
     $("run-start").disabled = true;
     cheerFired = {};
     $("run-mascot").classList.remove("bob");
+    $("run-mascot").style.backgroundImage = "url("+SPRITE+")";
     $("run-mascot").classList.add("run");
-    frameIdx = 0;
-    $("run-mascot").src = RUN_FRAMES[0];
-    frameTimer = setInterval(function(){ frameIdx = (frameIdx+1)%RUN_FRAMES.length; $("run-mascot").src = RUN_FRAMES[frameIdx]; }, 120);
     showCheer("出发！奶娃带你跑");
     var total = 8, rem = total;
     timer = setInterval(function(){ rem--; runTick(rem, total); }, 1000);
@@ -416,15 +412,13 @@
     rafTimer = requestAnimationFrame(raceTick);
   }
   function finishRun(){
-    cancelAnimationFrame(rafTimer);
-    clearInterval(timer); clearInterval(frameTimer); running = false;
+    clearInterval(timer); running = false;
     $("run-slot").classList.remove("racing");
     $("run-slot").style.left = "50%";
     $("run-slot").style.top = "60%";
-    $("run-mascot").style.transform = "";
     $("run-mascot").classList.remove("run");
     $("run-mascot").classList.add("bob");
-    $("run-mascot").src = CHAR[state.char].url;
+    $("run-mascot").style.backgroundImage = "url("+CHAR[state.char].url+")";
     $("run-start").disabled = false;
     // 结算：+0.5km，用时 2-4 分钟
     var min = 2 + Math.floor(Math.random()*3);
@@ -473,7 +467,7 @@
     state.name = ($("adopt-name").value || "").trim();
     save("nailong_run", state);
     $("run-name").textContent = state.name || "我的奶娃";
-    $("run-mascot").src = CHAR[state.char].url;
+    $("run-mascot").style.backgroundImage = "url("+CHAR[state.char].url+")";
     show("college");
   });
   $("college-submit").addEventListener("click", function(){
@@ -511,7 +505,7 @@
   $("adopt-name").value = state.name || "";
   $("run-name").textContent = state.name || "我的奶娃";
   $("run-college").textContent = state.college || "—";
-  $("run-mascot").src = CHAR[state.char].url;
+  $("run-mascot").style.backgroundImage = "url("+CHAR[state.char].url+")";
   $("run-mascot").classList.add("bob");
   $("run-per-km").textContent = "+"+PER_KM.toFixed(1);
   syncRunStats();
