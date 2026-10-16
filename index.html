@@ -108,7 +108,7 @@
   @keyframes racetrack{from{transform:translate(calc(-50% - 54vw),-50%);}to{transform:translate(calc(-50% + 54vw),-50%);}}
   #run .runner img{width:min(52vw,230px);filter:drop-shadow(0 16px 18px rgba(0,0,0,.42));}
   #run .runner img.bob{animation:bob 2.4s ease-in-out infinite;}
-  #run .runner img.run{width:min(60vw,265px);animation:run .5s ease-in-out infinite;}
+  #run .runner img.run{width:min(30vw,150px);animation:run .5s ease-in-out infinite;}
   @keyframes run{
     0%,100%{transform:translateY(0) rotate(-7deg);}
     25%{transform:translateY(-22px) rotate(3deg);}
@@ -211,7 +211,7 @@
 
   <!-- ===== 视图：开跑 ===== -->
   <section id="run" class="screen">
-    <img class="bg" src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/EqAOblUN7o6rQaxMa2rcOneonNh" alt="">
+    <img class="bg" src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/Xbn7b3zPDoJmQNxd07xcJtoAn1c" alt="">
     <div class="veil"></div>
     <div class="run-lines"><i></i><i></i><i></i><i></i><i></i></div>
     <div class="content">
@@ -372,7 +372,7 @@
     var c = $("run-cheer"); c.textContent = msg; c.classList.add("show");
     clearTimeout(showCheer._t); showCheer._t = setTimeout(function(){ c.classList.remove("show"); }, 1500);
   }
-  var running = false, timer = null, frameTimer = null, frameIdx = 0;
+  var running = false, timer = null, frameTimer = null, frameIdx = 0, rafTimer = null, raceAngle = 0, lastRaceTs = 0;
   function runTick(remaining, total){
     var pct = Math.round((total-remaining)/total*100);
     $("run-prog").style.width = pct+"%";
@@ -393,17 +393,38 @@
     cheerFired = {};
     $("run-mascot").classList.remove("bob");
     $("run-mascot").classList.add("run");
-    $("run-slot").classList.add("racing");
     frameIdx = 0;
     $("run-mascot").src = RUN_FRAMES[0];
-    frameTimer = setInterval(function(){ frameIdx = (frameIdx+1)%RUN_FRAMES.length; $("run-mascot").src = RUN_FRAMES[frameIdx]; }, 140);
+    frameTimer = setInterval(function(){ frameIdx = (frameIdx+1)%RUN_FRAMES.length; $("run-mascot").src = RUN_FRAMES[frameIdx]; }, 170);
+    raceAngle = 0; lastRaceTs = 0;
+    rafTimer = requestAnimationFrame(raceTick);
     showCheer("出发！奶娃带你跑");
     var total = 8, rem = total;
     timer = setInterval(function(){ rem--; runTick(rem, total); }, 1000);
   }
+  function raceTick(ts){
+    if(!running){ return; }
+    if(!lastRaceTs){ lastRaceTs = ts; rafTimer = requestAnimationFrame(raceTick); return; }
+    var dt = (ts-lastRaceTs)/1000; lastRaceTs = ts;
+    raceAngle += (360/8)*dt; // 8秒绕操场一圈
+    var a = raceAngle*Math.PI/180;
+    var x = 50 + 31*Math.cos(a);
+    var y = 47 + 19*Math.sin(a);
+    $("run-slot").style.left = x+"%";
+    $("run-slot").style.top = y+"%";
+    var dx = -Math.sin(a);
+    var tilt = Math.round(Math.atan2(Math.cos(a), -Math.sin(a))*180/Math.PI);
+    $("run-mascot").style.transform = (dx<0 ? "scaleX(-1) " : "")+"rotate("+tilt+"deg)";
+    if(raceAngle >= 360){ finishRun(); return; }
+    rafTimer = requestAnimationFrame(raceTick);
+  }
   function finishRun(){
+    cancelAnimationFrame(rafTimer);
     clearInterval(timer); clearInterval(frameTimer); running = false;
     $("run-slot").classList.remove("racing");
+    $("run-slot").style.left = "50%";
+    $("run-slot").style.top = "60%";
+    $("run-mascot").style.transform = "";
     $("run-mascot").classList.remove("run");
     $("run-mascot").classList.add("bob");
     $("run-mascot").src = CHAR[state.char].url;
