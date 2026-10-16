@@ -90,14 +90,14 @@
     40%{transform:scale(1.24) translate(-3%,-5%);}
     100%{transform:scale(1.18) translate(2%,-7%);}
   }
-  .run-lines{position:absolute;left:0;right:0;bottom:0;height:42%;z-index:1;pointer-events:none;overflow:hidden;}
-  .run-lines i{position:absolute;left:115%;border-radius:99px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.9));animation:linemove 1s linear infinite;}
-  .run-lines i:nth-child(1){bottom:6%;width:150px;height:7px;}
-  .run-lines i:nth-child(2){bottom:16%;width:90px;height:5px;animation-duration:.8s;animation-delay:.3s;}
-  .run-lines i:nth-child(3){bottom:26%;width:180px;height:6px;animation-duration:1.2s;animation-delay:.6s;}
-  .run-lines i:nth-child(4){bottom:34%;width:110px;height:5px;animation-duration:.9s;animation-delay:.1s;}
-  .run-lines i:nth-child(5){bottom:40%;width:130px;height:6px;animation-duration:1.05s;animation-delay:.45s;}
-  @keyframes linemove{from{left:115%;opacity:0;}8%{opacity:1;}92%{opacity:1;}to{left:-190px;opacity:0;}}
+  .run-lines{position:absolute;left:4%;right:4%;bottom:0;top:34%;z-index:1;pointer-events:none;overflow:hidden;}
+  .run-lines i{position:absolute;left:0;right:0;height:6px;border-radius:99px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.85),rgba(255,255,255,0));animation:linemove2 1s linear infinite;}
+  .run-lines i:nth-child(1){top:110%;}
+  .run-lines i:nth-child(2){top:110%;animation-delay:.25s;}
+  .run-lines i:nth-child(3){top:110%;animation-delay:.5s;}
+  .run-lines i:nth-child(4){top:110%;animation-delay:.75s;}
+  .run-lines i:nth-child(5){top:110%;animation-duration:1.2s;animation-delay:.1s;}
+  @keyframes linemove2{from{top:110%;opacity:0;}6%{opacity:1;}94%{opacity:1;}to{top:-10%;opacity:0;}}
   #run .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,40,25,.1),rgba(20,40,25,.72));}
   #run .content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;}
   #run .top{padding:20px 20px 0; display:flex; align-items:center; gap:12px;}
@@ -356,10 +356,12 @@
 
   /* ---- 开跑模拟 ---- */
   var RUN_FRAMES = [
-    M+"Dk3ob3V9Tow6cxxoRHrcOcpPnGf", // 帧1 迈左腿
-    M+"DfE0b3qSIoWGQ0xCNwYczn9bnzc", // 帧2 腾空
-    M+"MlkRb5GNUoLLfTxXOgUcO31LnDb", // 帧3 迈右腿
-    M+"DfE0b3qSIoWGQ0xCNwYczn9bnzc"  // 帧2 腾空（循环）
+    M+"Dk3ob3V9Tow6cxxoRHrcOcpPnGf", // 1 迈左腿
+    M+"EsGNb2HJ7oSEwMxKJGvcAlNnnDh", // 2 蹬地
+    M+"DfE0b3qSIoWGQ0xCNwYczn9bnzc", // 3 腾空并拢
+    M+"UL54bvS32omSgQxGzgWcJtlmnjU", // 4 腾空最高点
+    M+"MlkRb5GNUoLLfTxXOgUcO31LnDb", // 5 迈右腿
+    M+"Sx12bYsUGolqsSx1KgicUZSincb"  // 6 落地缓冲
   ];
   var CHEERS = [
     {at:8,  msg:"出发！奶娃带你跑"},
@@ -395,9 +397,7 @@
     $("run-mascot").classList.add("run");
     frameIdx = 0;
     $("run-mascot").src = RUN_FRAMES[0];
-    frameTimer = setInterval(function(){ frameIdx = (frameIdx+1)%RUN_FRAMES.length; $("run-mascot").src = RUN_FRAMES[frameIdx]; }, 200);
-    raceAngle = 0; lastRaceTs = 0;
-    rafTimer = requestAnimationFrame(raceTick);
+    frameTimer = setInterval(function(){ frameIdx = (frameIdx+1)%RUN_FRAMES.length; $("run-mascot").src = RUN_FRAMES[frameIdx]; }, 120);
     showCheer("出发！奶娃带你跑");
     var total = 8, rem = total;
     timer = setInterval(function(){ rem--; runTick(rem, total); }, 1000);
