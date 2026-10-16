@@ -85,7 +85,19 @@
   /* ===== 开跑 ===== */
   #run{background:var(--ink);}
   #run .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9;animation:pushin 9s ease-in-out infinite alternate;}
-  @keyframes pushin{from{transform:scale(1) translateY(0);}to{transform:scale(1.18) translateY(-6%);}}
+  @keyframes pushin{
+    0%{transform:scale(1.02) translate(0,0);}
+    40%{transform:scale(1.24) translate(-3%,-5%);}
+    100%{transform:scale(1.18) translate(2%,-7%);}
+  }
+  .run-lines{position:absolute;left:0;right:0;bottom:0;height:42%;z-index:1;pointer-events:none;overflow:hidden;}
+  .run-lines i{position:absolute;left:115%;border-radius:99px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.9));animation:linemove 1s linear infinite;}
+  .run-lines i:nth-child(1){bottom:6%;width:150px;height:7px;}
+  .run-lines i:nth-child(2){bottom:16%;width:90px;height:5px;animation-duration:.8s;animation-delay:.3s;}
+  .run-lines i:nth-child(3){bottom:26%;width:180px;height:6px;animation-duration:1.2s;animation-delay:.6s;}
+  .run-lines i:nth-child(4){bottom:34%;width:110px;height:5px;animation-duration:.9s;animation-delay:.1s;}
+  .run-lines i:nth-child(5){bottom:40%;width:130px;height:6px;animation-duration:1.05s;animation-delay:.45s;}
+  @keyframes linemove{from{left:115%;opacity:0;}8%{opacity:1;}92%{opacity:1;}to{left:-190px;opacity:0;}}
   #run .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,40,25,.1),rgba(20,40,25,.72));}
   #run .content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;}
   #run .top{padding:20px 20px 0; display:flex; align-items:center; gap:12px;}
@@ -198,6 +210,7 @@
   <section id="run" class="screen">
     <img class="bg" src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/EqAOblUN7o6rQaxMa2rcOneonNh" alt="">
     <div class="veil"></div>
+    <div class="run-lines"><i></i><i></i><i></i><i></i><i></i></div>
     <div class="content">
       <div class="top">
         <button class="back" id="run-back">‹</button>
