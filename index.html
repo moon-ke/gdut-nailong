@@ -211,7 +211,7 @@
 
   <!-- ===== 视图：开跑 ===== -->
   <section id="run" class="screen">
-    <img class="bg" src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/Xbn7b3zPDoJmQNxd07xcJtoAn1c" alt="">
+    <img class="bg" src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/XU17bXmWAoEckExFzIbceaY0noj" alt="">
     <div class="veil"></div>
     <div class="run-lines"><i></i><i></i><i></i><i></i><i></i></div>
     <div class="content">
@@ -406,14 +406,14 @@
     if(!running){ return; }
     if(!lastRaceTs){ lastRaceTs = ts; rafTimer = requestAnimationFrame(raceTick); return; }
     var dt = (ts-lastRaceTs)/1000; lastRaceTs = ts;
-    raceAngle += (360/8)*dt; // 8秒绕操场一圈
-    var a = raceAngle*Math.PI/180;
-    var x = 50 + 31*Math.cos(a);
-    var y = 46 + 22*Math.sin(a);
-    $("run-slot").style.left = x+"%";
+    raceAngle += (360/8)*dt; // 8秒跑完
+    var p = Math.min(raceAngle/360, 1);
+    // 沿跑道中线从近(下)跑到远(上)，脚始终踩在跑道上
+    var y = 72 - 26*p;
+    var s = (1 - 0.3*p).toFixed(3);
+    $("run-slot").style.left = "50%";
     $("run-slot").style.top = y+"%";
-    var dx = -Math.sin(a);
-    $("run-mascot").style.transform = (dx<0 ? "scaleX(-1) " : "");
+    $("run-mascot").style.transform = "scale("+s+")";
     if(raceAngle >= 360){ finishRun(); return; }
     rafTimer = requestAnimationFrame(raceTick);
   }
