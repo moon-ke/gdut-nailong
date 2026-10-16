@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>奶娃帮我校园跑</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23FFC93C'/%3E%3Ccircle cx='22' cy='30' r='6' fill='%232E3A2E'/%3E%3Ccircle cx='42' cy='30' r='6' fill='%232E3A2E'/%3E%3Cpath d='M20 44 Q32 54 44 44' stroke='%232E3A2E' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --yellow:#FFC93C; --yellow-d:#F5A81C; --cream:#FFF7E6; --orange:#F08A1D; --orange-d:#C96A10;
+    --green:#3A9C5B; --green-d:#2E7D46; --ink:#2E3A2E; --muted:#7C8A7C; --card:#FFFFFF; --line:#F0E4CF;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+    background:#EAF3E6; color:var(--ink); -webkit-font-smoothing:antialiased;
+  }
+  /* 手机壳容器：桌面端居中 */
+  #app{
+    position:relative; width:100%; height:100dvh; margin:0 auto; overflow:hidden; background:var(--cream);
+  }
+  @media (min-width:520px){ #app{max-width:430px; box-shadow:0 0 60px rgba(0,0,0,.15);} }
+
+  /* ===== 视图通用 ===== */
+  .screen{position:absolute; inset:0; display:none; flex-direction:column; padding:0; animation:fade .3s ease;}
+  .screen.active{display:flex;}
+  @keyframes fade{from{opacity:0; transform:translateY(10px);}to{opacity:1; transform:none;}}
+  .scrolly{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    padding:18px 20px; border:none; border-radius:999px; font-size:19px; font-weight:700; color:#fff;
+    background:linear-gradient(180deg,var(--orange),var(--orange-d)); cursor:pointer;
+    box-shadow:0 8px 0 var(--orange-d), 0 14px 26px rgba(240,138,29,.32);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:active{transform:translateY(5px); box-shadow:0 3px 0 var(--orange-d),0 8px 16px rgba(240,138,29,.3);}
+  .btn.ghost{background:linear-gradient(180deg,var(--yellow),var(--yellow-d)); box-shadow:0 8px 0 var(--yellow-d),0 14px 26px rgba(255,201,60,.35);}
+  .btn.ghost:active{box-shadow:0 3px 0 var(--yellow-d),0 8px 16px rgba(255,201,60,.3);}
+  .btn.green{background:linear-gradient(180deg,var(--green),var(--green-d)); box-shadow:0 8px 0 var(--green-d),0 14px 26px rgba(58,156,91,.3);}
+  .btn.green:active{box-shadow:0 3px 0 var(--green-d),0 8px 16px rgba(58,156,91,.28);}
+  .btn:disabled{opacity:.55; cursor:not-allowed; transform:none; box-shadow:0 8px 0 var(--orange-d),0 10px 18px rgba(240,138,29,.2);}
+  .pill{display:inline-flex; align-items:center; gap:6px; background:#fff; border:2px solid var(--line); border-radius:999px; padding:6px 14px; font-size:14px; font-weight:600; color:var(--muted);}
+  .pill b{color:var(--orange);}
+  .back{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fff;border:2px solid var(--line);border-radius:50%;cursor:pointer;font-size:20px;color:var(--ink);}
+  .title{font-size:26px;font-weight:800;letter-spacing:.5px;color:var(--ink);}
+  .sub{font-size:15px;color:var(--muted);margin-top:6px;line-height:1.5;}
+
+  /* ===== 开场 ===== */
+  #welcome{background:linear-gradient(180deg,var(--cream),#FFF1D6);}
+  #welcome .hero{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 30px;}
+  #welcome .logo-badge{font-size:13px;font-weight:700;color:var(--green);background:#fff;border:2px solid var(--green);padding:6px 16px;border-radius:999px;letter-spacing:2px;}
+  #welcome h1{font-size:40px;line-height:1.15;font-weight:900;margin:18px 0 10px;color:var(--ink);}
+  #welcome h1 .wave{color:var(--orange);}
+  #welcome .lead{font-size:16px;color:var(--muted);line-height:1.6;}
+  #welcome .mascot{width:min(66vw,280px);border-radius:32px;box-shadow:0 18px 40px rgba(245,168,28,.28);margin:6px 0 20px;animation:bob 2.6s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-10px) rotate(1deg);}}
+  #welcome .actions{padding:0 30px 44px; display:flex; flex-direction:column; gap:12px;}
+
+  /* ===== 领养 ===== */
+  #adopt .top{padding:22px 22px 8px; display:flex; align-items:center; gap:14px;}
+  #adopt .stage{padding:10px 22px 0; text-align:center;}
+  #adopt .preview{width:min(60vw,250px);border-radius:28px;background:#fff;border:3px solid var(--line);box-shadow:0 14px 30px rgba(0,0,0,.06);}
+  #adopt .preview.pick{animation:pick .4s ease;}
+  @keyframes pick{0%{transform:scale(.92);}60%{transform:scale(1.05);}100%{transform:scale(1);}}
+  #adopt .name-input{width:100%;margin-top:14px;padding:15px 18px;font-size:17px;border:2px solid var(--line);border-radius:16px;background:#fff;color:var(--ink);text-align:center;font-weight:600;outline:none;}
+  #adopt .name-input:focus{border-color:var(--yellow-d);}
+  #adopt .swatches{display:flex;gap:12px;overflow-x:auto;padding:18px 22px 8px;scroll-snap-type:x mandatory;}
+  #adopt .sw{flex:0 0 auto;width:86px;text-align:center;scroll-snap-align:start;}
+  #adopt .sw img{width:82px;height:82px;object-fit:contain;border-radius:20px;background:#fff;border:3px solid var(--line);padding:6px;cursor:pointer;transition:all .15s;}
+  #adopt .sw.on img{border-color:var(--orange);box-shadow:0 0 0 4px rgba(240,138,29,.18);transform:scale(1.05);}
+  #adopt .sw span{display:block;font-size:12px;color:var(--muted);margin-top:6px;font-weight:600;}
+  #adopt .actions{padding:14px 22px 34px;}
+  #adopt .hint{text-align:center;font-size:12px;color:var(--muted);padding:8px 0 0;}
+
+  /* ===== 选学院 ===== */
+  #college .top{padding:22px 22px 8px; display:flex; align-items:center; gap:14px;}
+  #college .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:18px 22px 8px;flex:1;min-height:0;overflow-y:auto;align-content:start;}
+  #college .col{background:#fff;border:2px solid var(--line);border-radius:18px;padding:18px 12px;text-align:center;cursor:pointer;font-weight:700;font-size:16px;line-height:1.4;transition:all .15s;min-height:64px;display:flex;align-items:center;justify-content:center;}
+  #college .col.on{border-color:var(--green);background:#EFF8F1;color:var(--green-d);box-shadow:0 0 0 4px rgba(58,156,91,.14);}
+  #college .actions{padding:14px 22px 34px;}
+  #college .note{text-align:center;font-size:12px;color:var(--muted);padding:8px 22px 0;}
+
+  /* ===== 开跑 ===== */
+  #run{background:var(--ink);}
+  #run .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9;}
+  #run .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,40,25,.1),rgba(20,40,25,.72));}
+  #run .content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;}
+  #run .top{padding:20px 20px 0; display:flex; align-items:center; gap:12px;}
+  #run .back{background:rgba(255,255,255,.9);border-color:transparent;}
+  #run .runner{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:20px;}
+  #run .runner img{width:min(46vw,200px);filter:drop-shadow(0 16px 18px rgba(0,0,0,.35));}
+  #run .runner img.jog{animation:jog .6s ease-in-out infinite;}
+  @keyframes jog{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-14px) rotate(2deg);}}
+  #run .stats{position:relative;z-index:2;background:rgba(255,255,255,.96);border-radius:28px 28px 0 0;padding:22px 22px 30px;}
+  #run .stat-row{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  #run .stat b{font-size:26px;color:var(--orange);}
+  #run .stat span{display:block;font-size:13px;color:var(--muted);margin-top:2px;}
+  #run .prog{margin:14px 0 4px;height:14px;background:var(--line);border-radius:99px;overflow:hidden;}
+  #run .prog i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--yellow),var(--orange));border-radius:99px;transition:width .1s linear;}
+  #run .prog-label{font-size:13px;color:var(--muted);text-align:center;margin-bottom:14px;font-weight:600;}
+  #run .run-title{font-size:15px;font-weight:700;color:var(--ink);}
+  #run .run-sub{font-size:13px;color:var(--muted);margin-top:4px;}
+  /* 结算浮层 */
+  .modal{position:absolute;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:rgba(30,45,30,.55);padding:26px;}
+  .modal.open{display:flex;}
+  .modal .box{width:100%;max-width:360px;background:var(--cream);border-radius:28px;padding:26px 24px;text-align:center;animation:pop .3s ease;}
+  @keyframes pop{from{opacity:0;transform:scale(.85);}to{opacity:1;transform:none;}}
+  .modal .box img{width:110px;border-radius:20px;box-shadow:0 10px 24px rgba(245,168,28,.3);}
+  .modal .big{font-size:34px;font-weight:900;color:var(--orange);margin:10px 0 4px;}
+  .modal .meta{font-size:15px;color:var(--muted);margin-bottom:8px;}
+  .modal .btns{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+
+  /* ===== 战绩 ===== */
+  #report .top{padding:22px 22px 8px; display:flex; align-items:center; gap:14px;}
+  #report .score{text-align:center;padding:14px 22px 6px;}
+  #report .score .num{font-size:64px;font-weight:900;color:var(--orange);line-height:1;}
+  #report .score .unit{font-size:16px;color:var(--muted);margin-top:6px;}
+  #report .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:16px 22px 6px;}
+  #report .card{background:#fff;border-radius:18px;border:2px solid var(--line);padding:16px;text-align:center;}
+  #report .card b{font-size:24px;color:var(--ink);}
+  #report .card span{display:block;font-size:12px;color:var(--muted);margin-top:4px;}
+  #report .rank{margin:16px 22px 6px;background:#fff;border-radius:18px;border:2px solid var(--line);padding:16px 18px;}
+  #report .rank .t{font-size:15px;font-weight:800;color:var(--ink);}
+  #report .rank .row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:14px;}
+  #report .rank .medal{color:var(--orange);font-weight:800;font-size:16px;}
+  #report .rank .mine{font-weight:700;color:var(--green-d);}
+  #report .mascot{width:min(34vw,150px);border-radius:22px;margin:8px auto 0;display:block;box-shadow:0 12px 26px rgba(0,0,0,.1);}
+  #report .actions{padding:14px 22px 34px;display:flex;flex-direction:column;gap:10px;}
+  #report .share-line{margin:14px 22px 0;background:#fff;border:2px dashed var(--orange);border-radius:14px;padding:12px 14px;font-size:14px;color:var(--ink);text-align:center;line-height:1.6;}
+  .toast{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);background:rgba(30,45,30,.9);color:#fff;font-size:14px;padding:12px 20px;border-radius:99px;z-index:40;opacity:0;pointer-events:none;transition:opacity .3s;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- ===== 视图：开场 ===== -->
+  <section id="welcome" class="screen active">
+    <div class="hero">
+      <div class="logo-badge">广东工业大学 · 校园跑</div>
+      <h1>奶娃帮你<br><span class="wave">校园跑</span></h1>
+      <p class="lead">领养一只奶娃，让它替你跑<br>攒里程、上学院榜，一键分享战绩</p>
+      <img class="mascot" src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/D2ftb1hHKoAAbGxvl0FcD9jEnKe" alt="奶娃">
+    </div>
+    <div class="actions">
+      <button class="btn" id="go-adopt">开始领养奶娃</button>
+      <p class="hint" style="text-align:center;font-size:12px;color:var(--muted);">先领养，再一起开跑</p>
+    </div>
+  </section>
+
+  <!-- ===== 视图：领养 ===== -->
+  <section id="adopt" class="screen">
+    <div class="top">
+      <button class="back" data-goto="welcome">‹</button>
+      <div><div class="title">领养一只奶娃</div><div class="sub">选个装扮，它就是你的搭子</div></div>
+    </div>
+    <div class="stage">
+      <img class="preview" id="adopt-preview" src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/D2ftb1hHKoAAbGxvl0FcD9jEnKe" alt="预览">
+    </div>
+    <div class="swatches" id="adopt-swatches"><!-- 由JS填充 --></div>
+    <div class="scrolly" style="flex:0;padding:0 22px;">
+      <input class="name-input" id="adopt-name" maxlength="10" placeholder="给奶娃起个名字（可选）">
+    </div>
+    <div class="actions">
+      <button class="btn" id="adopt-submit">领养它 →</button>
+      <p class="hint">不同同学可以有不同装扮哦</p>
+    </div>
+  </section>
+
+  <!-- ===== 视图：选学院 ===== -->
+  <section id="college" class="screen">
+    <div class="top">
+      <button class="back" data-goto="adopt">‹</button>
+      <div><div class="title">你来自哪个学院</div><div class="sub">为你和学院一起上榜</div></div>
+    </div>
+    <div class="grid" id="college-grid"><!-- 由JS填充 --></div>
+    <div class="note">* 学院列表为示例，可按学校实际调整</div>
+    <div class="actions">
+      <button class="btn" id="college-submit" disabled>确认，去开跑 →</button>
+    </div>
+  </section>
+
+  <!-- ===== 视图：开跑 ===== -->
+  <section id="run" class="screen">
+    <img class="bg" src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/LNsMbYBZfodnIkxWPTZcoLEknnf" alt="">
+    <div class="veil"></div>
+    <div class="content">
+      <div class="top">
+        <button class="back" id="run-back">‹</button>
+        <div style="color:#fff;"><div class="title" id="run-name" style="color:#fff;">奶娃</div><div class="sub" id="run-college" style="color:rgba(255,255,255,.8);">—</div></div>
+      </div>
+      <div class="runner">
+        <img id="run-mascot" src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/D2ftb1hHKoAAbGxvl0FcD9jEnKe" alt="奶娃跑">
+      </div>
+      <div class="stats">
+        <div class="stat-row">
+          <div class="stat"><b id="run-today">0.0</b><span>今日里程 km</span></div>
+          <div class="stat"><b id="run-total">0.0</b><span>累计里程 km</span></div>
+          <div class="stat"><b id="run-times">0</b><span>跑步次数</span></div>
+        </div>
+        <div class="prog"><i id="run-prog"></i></div>
+        <div class="prog-label" id="run-prog-label">还没开始跑</div>
+        <div style="text-align:center;margin-bottom:6px;">
+          <span class="pill"><b id="run-per-km">+0.5</b>&nbsp;km / 程 · 约 2-4 分钟</span>
+        </div>
+        <button class="btn green" id="run-start">开始跑步</button>
+      </div>
+    </div>
+
+    <!-- 结算浮层 -->
+    <div class="modal" id="run-done">
+      <div class="box">
+        <img src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/D2ftb1hHKoAAbGxvl0FcD9jEnKe" alt="奶娃">
+        <div class="run-title">跑完一程啦！</div>
+        <div class="big" id="done-km">+0.5 km</div>
+        <div class="meta" id="done-time">用时 —</div>
+        <div class="btns">
+          <button class="btn" id="done-report">去战绩海报 →</button>
+          <button class="btn ghost" id="done-again">再跑一程</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：战绩 ===== -->
+  <section id="report" class="screen">
+    <div class="top">
+      <button class="back" id="report-back">‹</button>
+      <div><div class="title">今日战绩</div><div class="sub" id="report-name-sub">奶娃 · —</div></div>
+    </div>
+    <div class="score">
+      <div class="num" id="rep-km">0.0</div>
+      <div class="unit">今日里程（km）</div>
+    </div>
+    <div class="cards">
+      <div class="card"><b id="rep-total">0.0</b><span>累计里程 km</span></div>
+      <div class="card"><b id="rep-times">0</b><span>累计跑步次数</span></div>
+    </div>
+    <div class="rank">
+      <div class="t">学院 · 今日排名（演示数据）</div>
+      <div class="row"><span>你的学院</span><span class="medal" id="rep-rank">第 — 名</span></div>
+      <div class="row"><span>你的排名</span><span id="rep-myrank" class="mine">—</span></div>
+    </div>
+    <img class="mascot" id="rep-mascot" src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/D2ftb1hHKoAAbGxvl0FcD9jEnKe" alt="奶娃">
+    <div class="share-line" id="rep-share-text">我帮奶娃跑完 0.0 km，奶娃替我攒着每一步！</div>
+    <div class="actions">
+      <button class="btn" id="rep-copy">复制分享文案</button>
+      <button class="btn ghost" id="rep-run">再跑一程</button>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+<script>
+(function(){
+  "use strict";
+  var M = "https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/";
+  var CHAR = {
+    base:     {url: M+"D2ftb1hHKoAAbGxvl0FcD9jEnKe",  name:"基础款"},
+    scarf:    {url: M+"CNrob3TOko4x3ExN1bVcC0v3nEh",  name:"红领巾"},
+    headband: {url: M+"Iy00bucBno9adlx1ybycVDAkn2d",  name:"运动头带"},
+    glasses:  {url: M+"Y5SXb2WNxoyq5cxFDITcxCwXnie",  name:"戴眼镜"},
+    bag:      {url: M+"FGHcbdFTVoUgsqxYGnhcoARUnNd",  name:"背书包"},
+    hoodie:   {url: M+"YfrQbj9XKori8bx3UqCcPPdcn9d",  name:"广工卫衣"}
+  };
+  var COLLEGES = ["计算机学院","机械工程学院","自动化学院","信息工程学院","材料与能源学院","轻工化工学院","土木与交通工程学院","管理学院","经济学院","外国语学院","艺术与设计学院","环境科学与工程学院"];
+  var PER_KM = 0.5;
+
+  function load(key, def){ try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }catch(e){ return def; } }
+  function save(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+
+  var state = load("nailong_run", {char:"base", name:"", college:""});
+  var stats = load("nailong_stats", {totalKm:0, runs:0, todayKm:0, lastMin:0, lastSec:0});
+
+  var $ = function(id){ return document.getElementById(id); };
+  function show(id){
+    document.querySelectorAll(".screen").forEach(function(s){ s.classList.remove("active"); });
+    var el = document.getElementById(id);
+    if (el){ el.classList.add("active"); el.scrollTop = 0; }
+    window.location.hash = "#/"+id;
+  }
+  function toast(msg){
+    var t = $("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove("show"); }, 2200);
+  }
+
+  /* ---- 领养装扮 ---- */
+  var chosen = (CHAR[state.char]? state.char : "base");
+  function fillSwatches(){
+    var box = $("adopt-swatches"); box.innerHTML = "";
+    Object.keys(CHAR).forEach(function(k){
+      var d = document.createElement("div"); d.className = "sw" + (k===chosen?" on":"");
+      d.innerHTML = '<img src="'+CHAR[k].url+'" alt="'+CHAR[k].name+'"><span>'+CHAR[k].name+"</span>";
+      d.addEventListener("click", function(){
+        chosen = k;
+        box.querySelectorAll(".sw").forEach(function(s){ s.classList.remove("on"); });
+        d.classList.add("on");
+        var pv = $("adopt-preview"); pv.src = CHAR[k].url; pv.classList.remove("pick"); void pv.offsetWidth; pv.classList.add("pick");
+      });
+      box.appendChild(d);
+    });
+  }
+  function adoptSync(){ $("adopt-preview").src = CHAR[chosen].url; }
+
+  /* ---- 学院 ---- */
+  var pickedCollege = (COLLEGES.indexOf(state.college)>=0 ? state.college : "");
+  function fillColleges(){
+    var g = $("college-grid"); g.innerHTML = "";
+    COLLEGES.forEach(function(c){
+      var d = document.createElement("div"); d.className = "col" + (c===pickedCollege?" on":"");
+      d.textContent = c;
+      d.addEventListener("click", function(){
+        pickedCollege = c;
+        g.querySelectorAll(".col").forEach(function(s){ s.classList.remove("on"); });
+        d.classList.add("on");
+        $("college-submit").disabled = false;
+      });
+      g.appendChild(d);
+    });
+  }
+
+  /* ---- 开跑模拟 ---- */
+  var running = false, timer = null;
+  function runTick(remaining, total){
+    var pct = Math.round((total-remaining)/total*100);
+    $("run-prog").style.width = pct+"%";
+    $("run-prog-label").textContent = "奶娃正在替你跑… "+(total-remaining)+"s / "+total+"s";
+    if (remaining <= 0){ finishRun(); }
+  }
+  function startRun(){
+    if (running) return;
+    running = true;
+    $("run-start").disabled = true;
+    $("run-mascot").classList.add("jog");
+    var total = 8, rem = total;
+    timer = setInterval(function(){ rem--; runTick(rem, total); }, 1000);
+  }
+  function finishRun(){
+    clearInterval(timer); running = false;
+    $("run-mascot").classList.remove("jog");
+    $("run-start").disabled = false;
+    // 结算：+0.5km，用时 2-4 分钟
+    var min = 2 + Math.floor(Math.random()*3);
+    var sec = Math.floor(Math.random()*60);
+    stats.totalKm = Math.round((stats.totalKm + PER_KM)*10)/10;
+    stats.todayKm = Math.round((stats.todayKm + PER_KM)*10)/10;
+    stats.runs += 1; stats.lastMin = min; stats.lastSec = sec;
+    save("nailong_stats", stats);
+    $("run-prog").style.width = "100%";
+    $("run-prog-label").textContent = "跑完啦！";
+    $("done-km").textContent = "+"+PER_KM.toFixed(1)+" km";
+    $("done-time").textContent = "用时 "+min+" 分 "+sec+" 秒";
+    $("run-done").classList.add("open");
+    syncRunStats();
+  }
+
+  /* ---- 渲染 ---- */
+  function syncRunStats(){
+    $("run-today").textContent = stats.todayKm.toFixed(1);
+    $("run-total").textContent = stats.totalKm.toFixed(1);
+    $("run-times").textContent = stats.runs;
+  }
+  function syncReport(){
+    var nm = state.name || "我的奶娃";
+    $("report-name-sub").textContent = nm+" · "+(state.college||"未选学院");
+    $("rep-km").textContent = stats.todayKm.toFixed(1);
+    $("rep-total").textContent = stats.totalKm.toFixed(1);
+    $("rep-times").textContent = stats.runs;
+    // 演示排名：学院今日排名（1-12），个人排名（今日跑数越多人气越高）
+    var colRank = Math.max(1, 12 - Math.floor(stats.todayKm*1.6));
+    var myRank = stats.runs>0 ? (Math.max(1, 40 - stats.runs*6)) : 0;
+    $("rep-rank").textContent = "第 "+colRank+" 名";
+    $("rep-myrank").textContent = stats.runs>0 ? ("校内第 "+myRank+" 名") : "跑起来就有排名";
+    $("rep-mascot").src = CHAR[chosen].url;
+    var share = "我在广工"+ (state.college||"") +"，帮奶娃跑完 "+stats.todayKm.toFixed(1)+" km（累计 "+stats.totalKm.toFixed(1)+" km），奶娃替我攒着每一步！你也要一起跑吗？";
+    $("rep-share-text").textContent = share;
+  }
+
+  /* ---- 绑定事件 ---- */
+  $("go-adopt").addEventListener("click", function(){ show("adopt"); });
+  document.querySelectorAll("[data-goto]").forEach(function(b){
+    b.addEventListener("click", function(){ show(b.getAttribute("data-goto")); });
+  });
+  $("adopt-submit").addEventListener("click", function(){
+    state.char = chosen;
+    state.name = ($("adopt-name").value || "").trim();
+    save("nailong_run", state);
+    $("run-name").textContent = state.name || "我的奶娃";
+    $("run-mascot").src = CHAR[state.char].url;
+    show("college");
+  });
+  $("college-submit").addEventListener("click", function(){
+    state.college = pickedCollege;
+    save("nailong_run", state);
+    $("run-college").textContent = state.college;
+    syncRunStats();
+    show("run");
+  });
+  $("run-back").addEventListener("click", function(){ show("college"); });
+  $("run-start").addEventListener("click", startRun);
+  $("done-report").addEventListener("click", function(){
+    $("run-done").classList.remove("open");
+    syncReport(); show("report");
+  });
+  $("done-again").addEventListener("click", function(){
+    $("run-done").classList.remove("open");
+  });
+  $("report-back").addEventListener("click", function(){ show("run"); });
+  $("rep-run").addEventListener("click", function(){ show("run"); });
+  $("rep-copy").addEventListener("click", function(){
+    var txt = $("rep-share-text").textContent;
+    function done(){ toast("已复制分享文案"); }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done, function(){ fallbackCopy(txt); done(); });
+    } else { fallbackCopy(txt); done(); }
+  });
+  function fallbackCopy(txt){
+    var ta = document.createElement("textarea"); ta.value = txt; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); }catch(e){} document.body.removeChild(ta);
+  }
+
+  /* ---- 初始化 ---- */
+  fillSwatches(); fillColleges(); adoptSync();
+  $("adopt-name").value = state.name || "";
+  $("run-name").textContent = state.name || "我的奶娃";
+  $("run-college").textContent = state.college || "—";
+  $("run-mascot").src = CHAR[state.char].url;
+  $("run-per-km").textContent = "+"+PER_KM.toFixed(1);
+  syncRunStats();
+  // hash 直达
+  var h = (location.hash||"").replace("#/","");
+  if (h && document.getElementById(h)){ show(h); }
+})();
+</script>
+</div>
+</body>
+</html>
