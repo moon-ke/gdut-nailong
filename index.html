@@ -108,7 +108,7 @@
   @keyframes racetrack{from{transform:translate(calc(-50% - 54vw),-50%);}to{transform:translate(calc(-50% + 54vw),-50%);}}
   #run .runner img{width:min(52vw,230px);filter:drop-shadow(0 16px 18px rgba(0,0,0,.42));}
   #run .runner img.bob{animation:bob 2.4s ease-in-out infinite;}
-  #run .runner img.run{width:min(30vw,150px);animation:run .5s ease-in-out infinite;}
+  #run .runner img.run{width:min(46vw,230px);animation:run .5s ease-in-out infinite;}
   @keyframes run{
     0%,100%{transform:translateY(0) rotate(-7deg);}
     25%{transform:translateY(-22px) rotate(3deg);}
@@ -395,7 +395,7 @@
     $("run-mascot").classList.add("run");
     frameIdx = 0;
     $("run-mascot").src = RUN_FRAMES[0];
-    frameTimer = setInterval(function(){ frameIdx = (frameIdx+1)%RUN_FRAMES.length; $("run-mascot").src = RUN_FRAMES[frameIdx]; }, 170);
+    frameTimer = setInterval(function(){ frameIdx = (frameIdx+1)%RUN_FRAMES.length; $("run-mascot").src = RUN_FRAMES[frameIdx]; }, 200);
     raceAngle = 0; lastRaceTs = 0;
     rafTimer = requestAnimationFrame(raceTick);
     showCheer("出发！奶娃带你跑");
@@ -409,12 +409,11 @@
     raceAngle += (360/8)*dt; // 8秒绕操场一圈
     var a = raceAngle*Math.PI/180;
     var x = 50 + 31*Math.cos(a);
-    var y = 47 + 19*Math.sin(a);
+    var y = 46 + 22*Math.sin(a);
     $("run-slot").style.left = x+"%";
     $("run-slot").style.top = y+"%";
     var dx = -Math.sin(a);
-    var tilt = Math.round(Math.atan2(Math.cos(a), -Math.sin(a))*180/Math.PI);
-    $("run-mascot").style.transform = (dx<0 ? "scaleX(-1) " : "")+"rotate("+tilt+"deg)";
+    $("run-mascot").style.transform = (dx<0 ? "scaleX(-1) " : "");
     if(raceAngle >= 360){ finishRun(); return; }
     rafTimer = requestAnimationFrame(raceTick);
   }
